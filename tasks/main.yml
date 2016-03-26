@@ -1,0 +1,65 @@
+---
+
+# rsyslog does not work well with SELinux, need more troubleshooting
+ 
+#- name: Create rsyslog group
+#  group:
+#    name: "{{ rsyslog_priv_drop_to_group }}"
+#    state: present
+
+#- name: Create rsyslog user
+#  user:
+#    name: "{{ rsyslog_priv_drop_to_user }}"
+#    group: "{{ rsyslog_priv_drop_to_group }}"
+#    groups: systemd-journal
+#    home: "{{ rsyslog_work_dir }}"
+#    createhome: no
+#    password: "!!"
+#    update_password: always
+#    state: present
+
+#- name: Create directories
+#  file:
+#    path: "{{ item }}"
+#    state: directory
+#    owner: "{{ rsyslog_file_owner }}"
+#    group: "{{ rsyslog_file_group }}"
+#    mode: "{{ rsyslog_dir_create_mode }}"
+#    seuser: system_u
+#    serole: object_r
+#    setype: var_log_t
+#    selevel: s0
+#  with_items:
+#    - "{{ rsyslog_work_dir }}"
+#    - "{{ rsyslog_log_dir }}"
+#    - "{{ rsyslog_log_dir_perhost }}"
+#
+
+#- name: Activate rsyslog v8 repository
+#  get_url:
+#    url: http://rpms.adiscon.com/v8-stable/rsyslog.repo
+#    dest: /etc/yum.repos.d/rsyslog.repo
+
+- name: Install packages
+  yum:
+    name: rsyslog
+    state: latest
+  notify:
+    - restart rsyslog
+
+- name: Configure rsyslog
+  template:
+    src: rsyslog.conf.j2
+    dest: /etc/rsyslog.conf
+    mode: '0644'
+    owner: root
+    group: root
+    backup: no
+  notify:
+    - restart rsyslog
+
+- name: Add RELP port to syslogd_port_t
+  command: "/usr/sbin/semanage port -a -t syslogd_port_t -p tcp 2514"
+  when: ansible_selinux.status == "enabled"
+  failed_when: false
+

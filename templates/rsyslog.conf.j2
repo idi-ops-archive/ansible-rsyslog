@@ -1,0 +1,41 @@
+$ModLoad imuxsock
+$ModLoad imjournal
+$ModLoad imrelp
+$ModLoad imudp
+$ModLoad imtcp
+$ModLoad omrelp
+
+$WorkDirectory /var/lib/rsyslog
+$ActionFileDefaultTemplate RSYSLOG_TraditionalFileFormat
+$IncludeConfig /etc/rsyslog.d/*.conf
+$OmitLocalLogging on
+$IMJournalStateFile imjournal.state
+
+$template DynaFile,"/var/log/hosts/%HOSTNAME%/%$YEAR%%$MONTH%%$DAY%.log"
+*.* -?DynaFile
+
+$RuleSet local
+kern.*                                       /dev/console
+*.info;mail.none;authpriv.none;cron.none     /var/log/messages
+authpriv.*                                   /var/log/secure
+mail.*                                       -/var/log/maillog
+cron.*                                       /var/log/cron
+*.emerg                                      :omusrmsg:*
+local7.*                                     /var/log/boot.log
+{% for entry in common_logservers %}
+*.*  :omrelp:{{ entry }}:2514
+{% endfor %}
+
+$RuleSet remote
+*.*                                          -?DynaFile
+
+$DefaultRuleset local
+
+$InputUDPServerBindRuleset remote
+$UDPServerRun 514
+
+$InputTCPServerBindRuleset remote
+$InputTCPServerRun 514
+
+$InputRELPServerBindRuleset remote
+$InputRELPServerRun 2514

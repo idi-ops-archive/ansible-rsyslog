@@ -1,0 +1,27 @@
+---
+
+rsyslog_listen_udp: yes
+rsyslog_udp_port: 601
+
+rsyslog_listen_tcp: yes
+rsyslog_tcp_port: 601
+rsyslog_tcp_keepalive: 'on'
+
+rsyslog_allowed_senders: []
+rsyslog_max_listeners: 32
+rsyslog_max_sessions: 512
+
+rsyslog_work_dir: /var/lib/rsyslog
+rsyslog_log_dir: /var/log
+rsyslog_log_dir_perhost: /var/log/hosts
+
+#rsyslog_file_owner: rsyslog
+rsyslog_file_owner: root
+#rsyslog_file_group: rsyslog
+rsyslog_file_group: root
+
+rsyslog_file_create_mode: '0644'
+rsyslog_dir_create_mode: '0755'
+
+#rsyslog_priv_drop_to_user: rsyslog
+#rsyslog_priv_drop_to_group: rsyslog

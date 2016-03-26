@@ -1,0 +1,12 @@
+---
+galaxy_info:
+  author: OCAD University
+  description: Configures a server to be a central logging server
+  company: OCAD University
+  license: MIT
+  min_ansible_version: 2.0
+  platforms:
+  - name: EL
+    versions:
+    - 7
+dependencies: []
