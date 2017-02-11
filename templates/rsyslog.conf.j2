@@ -1,9 +1,5 @@
 $ModLoad imuxsock
 $ModLoad imjournal
-$ModLoad imrelp
-$ModLoad imudp
-$ModLoad imtcp
-$ModLoad omrelp
 
 $WorkDirectory /var/lib/rsyslog
 $ActionFileDefaultTemplate RSYSLOG_TraditionalFileFormat
@@ -22,20 +18,27 @@ mail.*                                       -/var/log/maillog
 cron.*                                       /var/log/cron
 *.emerg                                      :omusrmsg:*
 local7.*                                     /var/log/boot.log
-{% for entry in common_logservers %}
-*.*  :omrelp:{{ entry }}:2514
-{% endfor %}
+*.*                                          @@127.0.0.1:601
 
 $RuleSet remote
 *.*                                          -?DynaFile
 
 $DefaultRuleset local
 
+{% if rsyslog_udp_enable %}
+$ModLoad imudp
 $InputUDPServerBindRuleset remote
-$UDPServerRun 514
+$UDPServerRun {{ rsyslog_udp_port }}
+{% endif %}
 
+{% if rsyslog_tcp_enable %}
+$ModLoad imtcp
 $InputTCPServerBindRuleset remote
-$InputTCPServerRun 514
+$InputTCPServerRun {{ rsyslog_tcp_port }}
+{% endif %}
 
+{% if rsyslog_relp_enable %}
+$ModLoad imrelp
 $InputRELPServerBindRuleset remote
-$InputRELPServerRun 2514
+$InputRELPServerRun {{ rsyslog_relp_port }}
+{% endif %}
